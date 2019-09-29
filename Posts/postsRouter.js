@@ -123,6 +123,34 @@ router.get('/:id/comments', (req, res) => {
 });
 
 
+router.post('/:post_id/comments', (req,res) => {
+    const { post_id } = req.params;
+    const { text } = req.body;
+
+    if (text === '' || typeof text !== "string") {
+        return res.status(400).json({error: "Commnent requires text!"})
+    }
+    db.insertComment({ text, post_id })
+    .then(({ id: comment_id}) => {
+        db.findCommentById(comment_id)
+        .then(([comment]) => {
+            if (comment) {
+                res.status(200).json(comment)
+            } else {
+                res.status(404).json({error: 'comment getting comment by this id'});
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({error: "Error getting comment"});
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json({error: "Error adding comment"});
+    })
+})
+
 
 
 
